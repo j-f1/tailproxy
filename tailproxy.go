@@ -14,11 +14,11 @@ import (
 )
 
 var (
-	// --https=off (default)
-	// --https=redirect (redirect HTTP to HTTPS)
+	// --https=off (only serve HTTP)
+	// --https=redirect (default, redirect HTTP to HTTPS)
 	// --https=only (only serve HTTPS)
 	// --https=both (serve both HTTP and HTTPS)
-	https = flag.String("https", "off", "HTTPS mode (off, on, only, both)")
+	https = flag.String("https", "redirect", "HTTPS mode (off, on, only, both)")
 )
 
 type httpsMode int
@@ -59,6 +59,7 @@ const (
 
 func parseOptions() options {
 	var opts options
+	opts.httpsMode = httpsRedirect
 
 	// env vars
 	var optionsMissing []string
