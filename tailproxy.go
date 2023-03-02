@@ -49,14 +49,14 @@ func parseHTTPSMode(s string) (httpsMode, error) {
 
 type options struct {
 	httpsMode   httpsMode
-	tailnetHost string
+	machineName string
 	target      *url.URL
 }
 
 const (
-	envHTTPSMode   = "TAILPROXY_HTTPS_MODE"
-	envTailnetHost = "TAILPROXY_TAILNET_HOST"
-	envTarget      = "TAILPROXY_TARGET"
+	envHTTPSMode = "TAILPROXY_HTTPS_MODE"
+	envName      = "TAILPROXY_NAME"
+	envTarget    = "TAILPROXY_TARGET"
 )
 
 func parseOptions() options {
@@ -85,10 +85,10 @@ func parseOptions() options {
 		}
 	}
 
-	if os.Getenv(envTailnetHost) != "" {
-		opts.tailnetHost = os.Getenv(envTailnetHost)
+	if os.Getenv(envName) != "" {
+		opts.machineName = os.Getenv(envName)
 	} else {
-		optionsMissing = append(optionsMissing, envTailnetHost)
+		optionsMissing = append(optionsMissing, envName)
 	}
 
 	if os.Getenv(envTarget) != "" {
@@ -113,7 +113,7 @@ func parseOptions() options {
 		flag.Usage()
 	}
 
-	opts.tailnetHost = flag.Arg(0)
+	opts.machineName = flag.Arg(0)
 	opts.target, err = url.Parse("http://" + flag.Arg(1))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v\n", err)
@@ -132,7 +132,7 @@ func main() {
 	opts := parseOptions()
 
 	s := new(tsnet.Server)
-	s.Hostname = opts.tailnetHost
+	s.Hostname = opts.machineName
 	s.Ephemeral = true
 
 	if err := s.Start(); err != nil {
@@ -197,7 +197,7 @@ func main() {
 		}()
 	}
 
-	fmt.Printf("tailproxy: listening as %s, forwarding to %v\n", opts.tailnetHost, opts.target)
+	fmt.Printf("tailproxy: listening as %s, forwarding to %v\n", opts.machineName, opts.target)
 
 	select {}
 }
