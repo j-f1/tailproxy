@@ -19,6 +19,8 @@ var (
 	// --https=only (only serve HTTPS)
 	// --https=both (serve both HTTP and HTTPS)
 	https = flag.String("https", "off", "HTTPS mode (off, on, only, both)")
+
+	help = flag.Bool("help", false, "show help")
 )
 
 type httpsMode int
@@ -58,6 +60,17 @@ const (
 )
 
 func parseOptions() options {
+	flag.Usage = func() {
+		fmt.Printf("usage: %s [flags] <tailnet host> <target host:port>\n", os.Args[0])
+		flag.PrintDefaults()
+		os.Exit(2)
+	}
+	flag.Parse()
+
+	if *help {
+		flag.Usage()
+	}
+
 	var opts options
 	opts.httpsMode = httpsRedirect
 
@@ -95,13 +108,6 @@ func parseOptions() options {
 	}
 
 	// CLI flags
-
-	flag.Usage = func() {
-		fmt.Printf("usage: %s [flags] <tailnet host> <target host:port>\n", os.Args[0])
-		flag.PrintDefaults()
-		os.Exit(2)
-	}
-	flag.Parse()
 
 	if flag.NArg() != 2 {
 		flag.Usage()
