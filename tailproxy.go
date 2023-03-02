@@ -67,7 +67,7 @@ func parseOptions() options {
 	if os.Getenv(envHTTPSMode) != "" {
 		opts.httpsMode, err = parseHTTPSMode(os.Getenv(envHTTPSMode))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "tailproxy: %v", err)
+			fmt.Fprintf(os.Stderr, "tailproxy: %v\n", err)
 			os.Exit(1)
 		}
 	}
@@ -81,7 +81,7 @@ func parseOptions() options {
 	if os.Getenv(envTarget) != "" {
 		opts.target, err = url.Parse("http://" + os.Getenv(envTarget))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v", err)
+			fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v\n", err)
 			os.Exit(1)
 		}
 	} else {
@@ -89,7 +89,7 @@ func parseOptions() options {
 	}
 
 	if len(optionsMissing) == 1 {
-		fmt.Fprintf(os.Stderr, "tailproxy: info: missing environment variable: %v. Using command line flags instead.", optionsMissing)
+		fmt.Fprintf(os.Stderr, "tailproxy: info: missing environment variable: %v. Using command line flags instead.\n", optionsMissing)
 	} else {
 		return opts
 	}
@@ -142,6 +142,7 @@ func main() {
 
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
+			fmt.Printf("tailproxy: %v %v %v\n", r.In.RemoteAddr, r.In.Method, r.In.URL)
 			r.SetXForwarded()
 			r.SetURL(opts.target)
 			r.Out.Host = r.In.Host
@@ -150,7 +151,7 @@ func main() {
 
 	httpListener, err := s.Listen("tcp", ":80")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "tailproxy: error listening on port 80: %v", err)
+		fmt.Fprintf(os.Stderr, "tailproxy: error listening on port 80: %v\n", err)
 		os.Exit(1)
 	}
 	go func() {
@@ -159,12 +160,12 @@ func main() {
 			if err := http.Serve(httpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
 			})); err != nil {
-				fmt.Fprintf(os.Stderr, "tailproxy: error serving HTTP redirect: %v", err)
+				fmt.Fprintf(os.Stderr, "tailproxy: error serving HTTP redirect: %v\n", err)
 				os.Exit(1)
 			}
 		} else {
 			if err := http.Serve(httpListener, proxy); err != nil {
-				fmt.Fprintf(os.Stderr, "tailproxy: error serving HTTP: %v", err)
+				fmt.Fprintf(os.Stderr, "tailproxy: error serving HTTP: %v\n", err)
 				os.Exit(1)
 			}
 		}
