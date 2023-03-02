@@ -127,6 +127,7 @@ func main() {
 
 	s := new(tsnet.Server)
 	s.Hostname = opts.tailnetHost
+	s.Ephemeral = true
 	defer s.Close()
 
 	if err := s.Start(); err != nil {
