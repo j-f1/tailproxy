@@ -69,8 +69,6 @@ func parseOptions() options {
 			fmt.Fprintf(os.Stderr, "tailproxy: %v", err)
 			os.Exit(1)
 		}
-	} else {
-		optionsMissing = append(optionsMissing, envHTTPSMode)
 	}
 
 	if os.Getenv(envTailnetHost) != "" {
@@ -89,10 +87,8 @@ func parseOptions() options {
 		optionsMissing = append(optionsMissing, envTarget)
 	}
 
-	if len(optionsMissing) > 0 {
-		if len(optionsMissing) < 3 {
-			fmt.Fprintf(os.Stderr, "tailproxy: info: missing environment variables: %v. Using command line flags instead.", optionsMissing)
-		}
+	if len(optionsMissing) == 1 {
+		fmt.Fprintf(os.Stderr, "tailproxy: info: missing environment variable: %v. Using command line flags instead.", optionsMissing)
 	} else {
 		return opts
 	}
