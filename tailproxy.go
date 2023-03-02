@@ -30,7 +30,75 @@ const (
 	httpsBoth
 )
 
-func main() {
+func parseHTTPSMode(s string) (httpsMode, error) {
+	switch s {
+	case "off":
+		return httpsOff, nil
+	case "redirect":
+		return httpsRedirect, nil
+	case "only":
+		return httpsOnly, nil
+	case "both":
+		return httpsBoth, nil
+	default:
+		return 0, fmt.Errorf("invalid https mode %q", s)
+	}
+}
+
+type options struct {
+	httpsMode   httpsMode
+	tailnetHost string
+	target      *url.URL
+}
+
+const (
+	envHTTPSMode   = "TAILPROXY_HTTPS_MODE"
+	envTailnetHost = "TAILPROXY_TAILNET_HOST"
+	envTarget      = "TAILPROXY_TARGET"
+)
+
+func parseOptions() options {
+	var opts options
+
+	// env vars
+	var optionsMissing []string
+	var err error
+	if os.Getenv(envHTTPSMode) != "" {
+		opts.httpsMode, err = parseHTTPSMode(os.Getenv(envHTTPSMode))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "tailproxy: %v", err)
+			os.Exit(1)
+		}
+	} else {
+		optionsMissing = append(optionsMissing, envHTTPSMode)
+	}
+
+	if os.Getenv(envTailnetHost) != "" {
+		opts.tailnetHost = os.Getenv(envTailnetHost)
+	} else {
+		optionsMissing = append(optionsMissing, envTailnetHost)
+	}
+
+	if os.Getenv(envTarget) != "" {
+		opts.target, err = url.Parse("http://" + os.Getenv(envTarget))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v", err)
+			os.Exit(1)
+		}
+	} else {
+		optionsMissing = append(optionsMissing, envTarget)
+	}
+
+	if len(optionsMissing) > 0 {
+		if len(optionsMissing) < 3 {
+			fmt.Fprintf(os.Stderr, "tailproxy: info: missing environment variables: %v. Using command line flags instead.", optionsMissing)
+		}
+	} else {
+		return opts
+	}
+
+	// CLI flags
+
 	flag.Usage = func() {
 		fmt.Printf("usage: %s [flags] <tailnet host> <target host:port>\n", os.Args[0])
 		flag.PrintDefaults()
@@ -42,29 +110,26 @@ func main() {
 		flag.Usage()
 	}
 
-	tailnetHost := flag.Arg(0)
-	target, err := url.Parse("http://" + flag.Arg(1))
+	opts.tailnetHost = flag.Arg(0)
+	opts.target, err = url.Parse("http://" + flag.Arg(1))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v\n", err)
 		flag.Usage()
 	}
 
-	var mode httpsMode
-	switch *https {
-	case "off":
-		mode = httpsOff
-	case "on":
-		mode = httpsRedirect
-	case "only":
-		mode = httpsOnly
-	case "both":
-		mode = httpsBoth
-	default:
-		flag.Usage()
+	opts.httpsMode, err = parseHTTPSMode(*https)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "tailproxy: %v\n", err)
 	}
 
+	return opts
+}
+
+func main() {
+	opts := parseOptions()
+
 	s := new(tsnet.Server)
-	s.Hostname = tailnetHost
+	s.Hostname = opts.tailnetHost
 	defer s.Close()
 
 	if err := s.Start(); err != nil {
@@ -81,7 +146,7 @@ func main() {
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
 			r.SetXForwarded()
-			r.SetURL(target)
+			r.SetURL(opts.target)
 			r.Out.Host = r.In.Host
 		},
 	}
@@ -93,7 +158,7 @@ func main() {
 	}
 	go func() {
 		defer httpListener.Close()
-		if mode == httpsRedirect {
+		if opts.httpsMode == httpsRedirect {
 			if err := http.Serve(httpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
 			})); err != nil {
@@ -109,7 +174,7 @@ func main() {
 	}()
 
 	var httpsListener net.Listener
-	if mode != httpsOff {
+	if opts.httpsMode != httpsOff {
 		tcpListener, err := s.Listen("tcp", ":443")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "tailproxy: error listening on port 443: %v\n", err)
@@ -127,7 +192,7 @@ func main() {
 		}()
 	}
 
-	fmt.Printf("tailproxy: listening as %s, forwarding to %s\n", tailnetHost, target)
+	fmt.Printf("tailproxy: listening as %s, forwarding to %v\n", opts.tailnetHost, opts.target)
 
 	select {}
 }
