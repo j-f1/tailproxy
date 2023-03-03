@@ -13,7 +13,7 @@ func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err, http.StatusInternalServerError)
 	}
 	fqdn := config.MachineName + "." + suffix
-	http.Redirect(w, r, "https://"+fqdn+r.RequestURI, http.StatusMovedPermanently)
+	http.Redirect(w, r, "https://"+fqdn+r.RequestURI, http.StatusFound)
 }
 
 func ServeHTTP() {
