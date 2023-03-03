@@ -185,8 +185,16 @@ func main() {
 			fmt.Fprintf(os.Stderr, "tailproxy: error listening on port 443: %v\n", err)
 			os.Exit(1)
 		}
+		cert, key, err := lc.CertPair(context.Background(), fqdn)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "tailproxy: error getting cert pair: %v\n", err)
+			os.Exit(1)
+		}
 		httpsListener = tls.NewListener(tcpListener, &tls.Config{
-			GetCertificate: lc.GetCertificate,
+			Certificates: []tls.Certificate{{
+				Certificate: [][]byte{cert},
+				PrivateKey:  key,
+			}},
 		})
 		go func() {
 			defer httpsListener.Close()
