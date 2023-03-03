@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"os"
 	"path"
 	"tailproxy/src/config"
 	"tailproxy/src/logger"
@@ -21,6 +22,10 @@ func StartServer() {
 	s.Hostname = config.MachineName
 	s.Ephemeral = true
 	if len(config.DataDir) > 0 {
+		err := os.MkdirAll(path.Join(config.DataDir, "tailscale"), 0700)
+		if err != nil {
+			logger.Fatal("error creating data dir: %v\n", err)
+		}
 		s.Dir = path.Join(config.DataDir, "tailscale")
 	}
 
