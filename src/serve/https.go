@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func ServeHTTPS(handler http.Handler) {
+func ServeHTTPS() {
 	tcpListener := ts.Listen("tcp", ":443")
 	httpsListener := tls.NewListener(tcpListener, &tls.Config{
 		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
@@ -18,7 +18,7 @@ func ServeHTTPS(handler http.Handler) {
 		},
 	})
 	defer httpsListener.Close()
-	if err := http.Serve(httpsListener, handler); err != nil {
+	if err := http.Serve(httpsListener, makeProxy()); err != nil {
 		logger.Fatal("error serving HTTPS: %v\n", err)
 	}
 }

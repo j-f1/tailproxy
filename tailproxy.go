@@ -14,13 +14,11 @@ func main() {
 	ts.StartServer()
 	defer ts.ShutdownServer()
 
-	proxy := serve.MakeProxy()
-
 	if config.HTTPSMode != config.HTTPSOnly {
-		go serve.ServeHTTP(proxy)
+		go serve.ServeHTTP()
 	}
 	if config.HTTPSMode != config.HTTPSOff {
-		go serve.ServeHTTPS(proxy)
+		go serve.ServeHTTPS()
 	}
 	if config.PProf {
 		go serve.ServePProf()

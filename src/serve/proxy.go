@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func MakeProxy() http.Handler {
+func makeProxy() http.Handler {
 	var start time.Time
 	return &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {

@@ -16,7 +16,7 @@ func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "https://"+fqdn+r.RequestURI, http.StatusMovedPermanently)
 }
 
-func ServeHTTP(handler http.Handler) {
+func ServeHTTP() {
 	httpListener := ts.Listen("tcp", ":80")
 	defer httpListener.Close()
 	if config.HTTPSMode == config.HTTPSRedirect {
@@ -24,7 +24,7 @@ func ServeHTTP(handler http.Handler) {
 			logger.Fatal("error serving HTTP redirect: %v\n", err)
 		}
 	} else {
-		if err := http.Serve(httpListener, handler); err != nil {
+		if err := http.Serve(httpListener, makeProxy()); err != nil {
 			logger.Fatal("error serving HTTP: %v\n", err)
 		}
 	}
