@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"flag"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"time"
 
 	"tailscale.com/tsnet"
 )
@@ -147,6 +149,34 @@ func main() {
 		os.Exit(1)
 	}
 
+	if lc == nil {
+		fmt.Fprintf(os.Stderr, "tailproxy: no local client; are you running tailscaled?\n")
+		os.Exit(1)
+	}
+
+	err = lc.StartLoginInteractive(context.Background())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "tailproxy: error starting login: %v\n", err)
+		os.Exit(1)
+	}
+	status, err := lc.Status(context.Background())
+	if err != nil || status == nil {
+		fmt.Fprintf(os.Stderr, "tailproxy: error getting profile status: %v\n", err)
+		os.Exit(1)
+	}
+	for status.BackendState != "Running" {
+		fmt.Printf("tailproxy: waiting for backend to start...\n")
+		status, err = lc.Status(context.Background())
+		if err != nil || status == nil {
+			fmt.Fprintf(os.Stderr, "tailproxy: error getting profile status: %v\n", err)
+			os.Exit(1)
+		}
+		time.Sleep(2 * time.Second)
+	}
+
+	fmt.Printf("tailproxy: status: %v\n", status.BackendState)
+	fqdn := opts.machineName + "." + status.CurrentTailnet.MagicDNSSuffix
+
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
 			fmt.Printf("tailproxy: %v %v %v\n", r.In.RemoteAddr, r.In.Method, r.In.URL)
@@ -165,7 +195,7 @@ func main() {
 		defer httpListener.Close()
 		if opts.httpsMode == httpsRedirect {
 			if err := http.Serve(httpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
+				http.Redirect(w, r, "https://"+fqdn+r.RequestURI, http.StatusMovedPermanently)
 			})); err != nil {
 				fmt.Fprintf(os.Stderr, "tailproxy: error serving HTTP redirect: %v\n", err)
 				os.Exit(1)
