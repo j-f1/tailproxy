@@ -164,7 +164,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "tailproxy: error getting profile status: %v\n", err)
 		os.Exit(1)
 	}
-	for status.BackendState != "Running" {
+	for status.BackendState != "Running" && status.BackendState != "NoState" {
 		fmt.Printf("tailproxy: waiting for backend to start... (status: %v)\n", status.BackendState)
 		status, err = lc.Status(context.Background())
 		if err != nil || status == nil {
