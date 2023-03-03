@@ -1,4 +1,4 @@
-package tailproxy
+package main
 
 import (
 	"tailproxy/src/config"
