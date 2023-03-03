@@ -15,57 +15,11 @@ var (
 	PProf       = false
 )
 
-const (
-	HTTPSOff HTTPSModeValue = iota
-	HTTPSRedirect
-	HTTPSOnly
-	HTTPSBoth
-)
-
 var (
-	// --https=off (default, only serve HTTP)
-	// --https=redirect (redirect HTTP to HTTPS)
-	// --https=only (only serve HTTPS)
-	// --https=both (serve both HTTP and HTTPS)
-	https = flag.String("https", "off", "HTTPS mode (off, on, only, both)")
-
-	pprof = flag.Bool("pprof", false, "enable pprof")
-
-	help = flag.Bool("help", false, "show help")
+	https   = flag.String("https", "off", "HTTPS mode (off, on, only, both)")
+	pprof   = flag.Bool("pprof", false, "enable pprof")
+	help    = flag.Bool("help", false, "show help")
 )
-
-type HTTPSModeValue int
-
-func (m HTTPSModeValue) String() string {
-	switch m {
-	case HTTPSOff:
-		return "off"
-	case HTTPSRedirect:
-		return "redirect"
-	case HTTPSOnly:
-		return "only"
-	case HTTPSBoth:
-		return "both"
-	default:
-		return fmt.Sprintf("unknown https mode %d", m)
-	}
-}
-
-func parseHTTPSMode(s string) HTTPSModeValue {
-	switch s {
-	case "off":
-		return HTTPSOff
-	case "redirect":
-		return HTTPSRedirect
-	case "only":
-		return HTTPSOnly
-	case "both":
-		return HTTPSBoth
-	default:
-		logger.Fatal("invalid https mode %q", s)
-		return -1
-	}
-}
 
 const (
 	envHTTPSMode = "TAILPROXY_HTTPS_MODE"
