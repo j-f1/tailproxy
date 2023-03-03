@@ -11,3 +11,7 @@ func Log(message string, args ...interface{}) {
 func Err(message string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, "tailproxy: "+message, args...)
 }
+func Fatal(message string, args ...interface{}) {
+	Err(message, args...)
+	os.Exit(1)
+}
