@@ -19,6 +19,7 @@ var lc *tailscale.LocalClient
 func StartServer() {
 	s.Hostname = config.MachineName
 	s.Ephemeral = true
+	s.Dir = "/data/tailscale"
 
 	var err error
 	lc, err = s.LocalClient()
