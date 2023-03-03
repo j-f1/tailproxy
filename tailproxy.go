@@ -186,12 +186,13 @@ func main() {
 		},
 	}
 
-	httpListener, err := s.Listen("tcp", ":80")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "tailproxy: error listening on port 80: %v\n", err)
-		os.Exit(1)
-	}
 	go func() {
+		httpListener, err := s.Listen("tcp", ":80")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "tailproxy: error listening on port 80: %v\n", err)
+			os.Exit(1)
+		}
+
 		defer httpListener.Close()
 		if opts.httpsMode == httpsRedirect {
 			if err := http.Serve(httpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -208,8 +209,8 @@ func main() {
 		}
 	}()
 
-	var httpsListener net.Listener
 	if opts.httpsMode != httpsOff {
+		var httpsListener net.Listener
 		tcpListener, err := s.Listen("tcp", ":443")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "tailproxy: error listening on port 443: %v\n", err)
