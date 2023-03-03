@@ -22,5 +22,8 @@ func main() {
 	if config.HTTPSMode != config.HTTPSOff {
 		go serve.ServeHTTPS(proxy)
 	}
+	if config.PProf {
+		go serve.ServePProf()
+	}
 	select {}
 }

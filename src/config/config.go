@@ -12,6 +12,7 @@ var (
 	HTTPSMode   = HTTPSOff
 	MachineName string
 	Target      *url.URL
+	PProf       = false
 )
 
 const (
@@ -27,6 +28,8 @@ var (
 	// --https=only (only serve HTTPS)
 	// --https=both (serve both HTTP and HTTPS)
 	https = flag.String("https", "off", "HTTPS mode (off, on, only, both)")
+
+	pprof = flag.Bool("pprof", false, "enable pprof")
 
 	help = flag.Bool("help", false, "show help")
 )
@@ -68,6 +71,7 @@ const (
 	envHTTPSMode = "TAILPROXY_HTTPS_MODE"
 	envName      = "TAILPROXY_NAME"
 	envTarget    = "TAILPROXY_TARGET"
+	envPProf     = "TAILPROXY_PPROF_ENABLED"
 )
 
 func Parse() {
@@ -87,6 +91,10 @@ func Parse() {
 	var err error
 	if os.Getenv(envHTTPSMode) != "" {
 		HTTPSMode = parseHTTPSMode(os.Getenv(envHTTPSMode))
+	}
+
+	if os.Getenv((envPProf)) != "" {
+		PProf = true
 	}
 
 	if os.Getenv(envName) != "" {
@@ -119,6 +127,7 @@ func Parse() {
 			flag.Usage()
 		}
 
+		PProf = *pprof
 		HTTPSMode = parseHTTPSMode(*https)
 	}
 }
