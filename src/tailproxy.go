@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"tailproxy/src/config"
+	"tailproxy/src/serve"
 	"time"
 
 	"tailscale.com/tsnet"
@@ -51,20 +51,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var start time.Time
-	proxy := &httputil.ReverseProxy{
-		Rewrite: func(r *httputil.ProxyRequest) {
-			start = time.Now()
-			fmt.Printf("tailproxy: %v %v %v\n", r.In.RemoteAddr, r.In.Method, r.In.URL)
-			r.SetXForwarded()
-			r.SetURL(opts.Target)
-			r.Out.Host = r.In.Host
-		},
-		ModifyResponse: func(r *http.Response) error {
-			fmt.Printf("tailproxy: %v %v %v %v %v\n", r.Request.RemoteAddr, r.Request.Method, r.Request.URL, r.StatusCode, time.Since(start))
-			return nil
-		},
-	}
+	proxy := serve.MakeProxy(opts)
 
 	go func() {
 		httpListener, err := s.Listen("tcp", ":80")
