@@ -10,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"time"
 
 	"tailscale.com/tsnet"
 )
@@ -47,6 +48,20 @@ func parseHTTPSMode(s string) (httpsMode, error) {
 		return 0, fmt.Errorf("invalid https mode %q", s)
 	}
 }
+func (m httpsMode) String() string {
+	switch m {
+	case httpsOff:
+		return "off"
+	case httpsRedirect:
+		return "redirect"
+	case httpsOnly:
+		return "only"
+	case httpsBoth:
+		return "both"
+	default:
+		return fmt.Sprintf("unknown https mode %d", m)
+	}
+}
 
 type options struct {
 	httpsMode   httpsMode
@@ -73,7 +88,7 @@ func parseOptions() options {
 	}
 
 	var opts options
-	opts.httpsMode = httpsRedirect
+	opts.httpsMode = httpsOff
 
 	// env vars
 	var optionsMissing []string
@@ -132,6 +147,8 @@ func parseOptions() options {
 func main() {
 	opts := parseOptions()
 
+	fmt.Printf("tailproxy: machine name: %v, target: %v, https mode: %v\n", opts.machineName, opts.target, opts.httpsMode)
+
 	s := new(tsnet.Server)
 	s.Hostname = opts.machineName
 	s.Ephemeral = true
@@ -164,14 +181,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	// fqdn := opts.machineName + "." + status.CurrentTailnet.MagicDNSSuffix
-
+	var start time.Time
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
+			start = time.Now()
 			fmt.Printf("tailproxy: %v %v %v\n", r.In.RemoteAddr, r.In.Method, r.In.URL)
 			r.SetXForwarded()
 			r.SetURL(opts.target)
 			r.Out.Host = r.In.Host
+		},
+		ModifyResponse: func(r *http.Response) error {
+			fmt.Printf("tailproxy: %v %v %v %v %v\n", r.Request.RemoteAddr, r.Request.Method, r.Request.URL, r.StatusCode, time.Since(start))
+			return nil
 		},
 	}
 
@@ -188,10 +209,16 @@ func main() {
 				status, err := lc.Status(context.Background())
 				if err != nil || status == nil {
 					fmt.Fprintf(os.Stderr, "tailproxy: error getting profile status: %v\n", err)
-					os.Exit(1)
+					http.Error(w, "error getting profile status", http.StatusInternalServerError)
+					return
 				}
-				fmt.Println(status)
-				http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
+				if status.CurrentTailnet == nil {
+					fmt.Fprintf(os.Stderr, "tailproxy: not logged in\n")
+					http.Error(w, "not logged in (CurrentTailnet is nil)", http.StatusForbidden)
+					return
+				}
+				fqdn := opts.machineName + "." + status.CurrentTailnet.MagicDNSSuffix
+				http.Redirect(w, r, "https://"+fqdn+r.RequestURI, http.StatusMovedPermanently)
 			})); err != nil {
 				fmt.Fprintf(os.Stderr, "tailproxy: error serving HTTP redirect: %v\n", err)
 				os.Exit(1)
@@ -211,16 +238,14 @@ func main() {
 			fmt.Fprintf(os.Stderr, "tailproxy: error listening on port 443: %v\n", err)
 			os.Exit(1)
 		}
-		cert, key, err := lc.CertPair(context.Background(), fqdn)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "tailproxy: error getting cert pair: %v\n", err)
-			os.Exit(1)
-		}
 		httpsListener = tls.NewListener(tcpListener, &tls.Config{
-			Certificates: []tls.Certificate{{
-				Certificate: [][]byte{cert},
-				PrivateKey:  key,
-			}},
+			GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+				start := time.Now()
+				defer func() {
+					fmt.Printf("tailproxy: GetCertificate took %v\n", time.Since(start))
+				}()
+				return lc.GetCertificate(hello)
+			},
 		})
 		go func() {
 			defer httpsListener.Close()
