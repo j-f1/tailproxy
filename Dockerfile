@@ -4,13 +4,13 @@ WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY *.go .
+COPY src ./src
 ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN \
     if [ "${TARGETARCH}" = "arm" ] && [ -n "${TARGETVARIANT}" ]; then \
       export GOARM="${TARGETVARIANT#v}"; \
     fi; \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -v .
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -v -o ./tailproxy ./src
 
 FROM cgr.dev/chainguard/static:latest
 ENV HOME /home/nonroot
