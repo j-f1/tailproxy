@@ -9,7 +9,7 @@ COPY tailproxy.go ./
 ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN CGO_ENABLED=0 go build tailproxy.go
 
-FROM cgr.dev/chainguard/static:latest
+FROM scratch
 ENV HOME /home/nonroot
 ENV TAILPROXY_DATA_DIR /data
 COPY --from=build /work/tailproxy /tailproxy
