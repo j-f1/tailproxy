@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"path"
 	"tailproxy/src/config"
 	"tailproxy/src/logger"
 
@@ -19,7 +20,9 @@ var lc *tailscale.LocalClient
 func StartServer() {
 	s.Hostname = config.MachineName
 	s.Ephemeral = true
-	s.Dir = "/data/tailscale"
+	if len(config.DataDir) > 0 {
+		s.Dir = path.Join(config.DataDir, "tailscale")
+	}
 
 	var err error
 	lc, err = s.LocalClient()

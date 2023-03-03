@@ -11,6 +11,7 @@ const (
 	envName      = "TAILPROXY_NAME"
 	envTarget    = "TAILPROXY_TARGET"
 	envPProf     = "TAILPROXY_PPROF_ENABLED"
+	envDataDir   = "TAILPROXY_DATA_DIR"
 )
 
 func loadConfigFromEnv() []string {
@@ -21,6 +22,10 @@ func loadConfigFromEnv() []string {
 
 	if os.Getenv(envPProf) != "" {
 		PProf = true
+	}
+
+	if os.Getenv(envDataDir) != "" {
+		DataDir = os.Getenv(envDataDir)
 	}
 
 	if os.Getenv(envName) != "" {

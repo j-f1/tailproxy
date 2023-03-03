@@ -9,6 +9,7 @@ import (
 
 var (
 	https   = flag.String("https", "off", "HTTPS mode (off, on, only, both)")
+	dataDir = flag.String("data-dir", "", "data directory")
 	pprof   = flag.Bool("pprof", false, "enable pprof")
 )
 
@@ -26,5 +27,6 @@ func loadConfigFromCLI() {
 	}
 
 	HTTPSMode = parseHTTPSMode(*https)
+	DataDir = *dataDir
 	PProf = *pprof
 }

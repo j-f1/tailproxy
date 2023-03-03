@@ -13,6 +13,7 @@ var (
 	MachineName string
 	Target      *url.URL
 	PProf       = false
+	DataDir     = ""
 )
 
 var (
