@@ -5,6 +5,20 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"tailproxy/src/logger"
+)
+
+var (
+	HTTPSMode   = HTTPSOff
+	MachineName string
+	Target      *url.URL
+)
+
+const (
+	HTTPSOff HTTPSModeValue = iota
+	HTTPSRedirect
+	HTTPSOnly
+	HTTPSBoth
 )
 
 var (
@@ -17,30 +31,9 @@ var (
 	help = flag.Bool("help", false, "show help")
 )
 
-type HTTPSMode int
+type HTTPSModeValue int
 
-const (
-	HTTPSOff HTTPSMode = iota
-	HTTPSRedirect
-	HTTPSOnly
-	HTTPSBoth
-)
-
-func parseHTTPSMode(s string) (HTTPSMode, error) {
-	switch s {
-	case "off":
-		return HTTPSOff, nil
-	case "redirect":
-		return HTTPSRedirect, nil
-	case "only":
-		return HTTPSOnly, nil
-	case "both":
-		return HTTPSBoth, nil
-	default:
-		return 0, fmt.Errorf("invalid https mode %q", s)
-	}
-}
-func (m HTTPSMode) String() string {
+func (m HTTPSModeValue) String() string {
 	switch m {
 	case HTTPSOff:
 		return "off"
@@ -55,10 +48,20 @@ func (m HTTPSMode) String() string {
 	}
 }
 
-type Options struct {
-	HTTPSMode   HTTPSMode
-	MachineName string
-	Target      *url.URL
+func parseHTTPSMode(s string) HTTPSModeValue {
+	switch s {
+	case "off":
+		return HTTPSOff
+	case "redirect":
+		return HTTPSRedirect
+	case "only":
+		return HTTPSOnly
+	case "both":
+		return HTTPSBoth
+	default:
+		logger.Fatal("invalid https mode %q", s)
+		return -1
+	}
 }
 
 const (
@@ -67,7 +70,7 @@ const (
 	envTarget    = "TAILPROXY_TARGET"
 )
 
-func ParseOptions() Options {
+func Parse() {
 	flag.Usage = func() {
 		fmt.Printf("usage: %s [flags] <tailnet host> <target host:port>\n", os.Args[0])
 		flag.PrintDefaults()
@@ -79,59 +82,43 @@ func ParseOptions() Options {
 		flag.Usage()
 	}
 
-	var opts Options
-	opts.HTTPSMode = HTTPSOff
-
 	// env vars
 	var optionsMissing []string
 	var err error
 	if os.Getenv(envHTTPSMode) != "" {
-		opts.HTTPSMode, err = parseHTTPSMode(os.Getenv(envHTTPSMode))
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "tailproxy: %v\n", err)
-			os.Exit(1)
-		}
+		HTTPSMode = parseHTTPSMode(os.Getenv(envHTTPSMode))
 	}
 
 	if os.Getenv(envName) != "" {
-		opts.MachineName = os.Getenv(envName)
+		MachineName = os.Getenv(envName)
 	} else {
 		optionsMissing = append(optionsMissing, envName)
 	}
 
 	if os.Getenv(envTarget) != "" {
-		opts.Target, err = url.Parse("http://" + os.Getenv(envTarget))
+		Target, err = url.Parse("http://" + os.Getenv(envTarget))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v\n", err)
-			os.Exit(1)
+			logger.Fatal("invalid target: %v\n", err)
 		}
 	} else {
 		optionsMissing = append(optionsMissing, envTarget)
 	}
 
-	if len(optionsMissing) == 1 {
-		fmt.Fprintf(os.Stderr, "tailproxy: info: missing environment variable: %v. Using command line flags instead.\n", optionsMissing)
-	} else {
-		return opts
+	if len(optionsMissing) > 0 {
+		logger.Err("info: missing environment variable: %v. Using command line flags instead.\n", optionsMissing)
+		// CLI flags
+
+		if flag.NArg() != 2 {
+			flag.Usage()
+		}
+
+		MachineName = flag.Arg(0)
+		Target, err = url.Parse("http://" + flag.Arg(1))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v\n", err)
+			flag.Usage()
+		}
+
+		HTTPSMode = parseHTTPSMode(*https)
 	}
-
-	// CLI flags
-
-	if flag.NArg() != 2 {
-		flag.Usage()
-	}
-
-	opts.MachineName = flag.Arg(0)
-	opts.Target, err = url.Parse("http://" + flag.Arg(1))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v\n", err)
-		flag.Usage()
-	}
-
-	opts.HTTPSMode, err = parseHTTPSMode(*https)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "tailproxy: %v\n", err)
-	}
-
-	return opts
 }

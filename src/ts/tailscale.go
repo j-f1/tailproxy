@@ -16,8 +16,8 @@ import (
 var s = new(tsnet.Server)
 var lc *tailscale.LocalClient
 
-func StartServer(opts config.Options) {
-	s.Hostname = opts.MachineName
+func StartServer() {
+	s.Hostname = config.MachineName
 	s.Ephemeral = true
 
 	var err error
