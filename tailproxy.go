@@ -10,7 +10,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"time"
 
 	"tailscale.com/tsnet"
 )
@@ -164,18 +163,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "tailproxy: error getting profile status: %v\n", err)
 		os.Exit(1)
 	}
-	for status.BackendState != "Running" && status.BackendState != "NoState" {
-		fmt.Printf("tailproxy: waiting for backend to start... (status: %v)\n", status.BackendState)
-		status, err = lc.Status(context.Background())
-		if err != nil || status == nil {
-			fmt.Fprintf(os.Stderr, "tailproxy: error getting profile status: %v\n", err)
-			os.Exit(1)
-		}
-		time.Sleep(2 * time.Second)
-	}
 
-	fmt.Printf("tailproxy: status: %v\n", status.BackendState)
-	fqdn := opts.machineName + "." + status.CurrentTailnet.MagicDNSSuffix
+	// fqdn := opts.machineName + "." + status.CurrentTailnet.MagicDNSSuffix
 
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
@@ -196,7 +185,13 @@ func main() {
 		defer httpListener.Close()
 		if opts.httpsMode == httpsRedirect {
 			if err := http.Serve(httpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, "https://"+fqdn+r.RequestURI, http.StatusMovedPermanently)
+				status, err := lc.Status(context.Background())
+				if err != nil || status == nil {
+					fmt.Fprintf(os.Stderr, "tailproxy: error getting profile status: %v\n", err)
+					os.Exit(1)
+				}
+				fmt.Println(status)
+				http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
 			})); err != nil {
 				fmt.Fprintf(os.Stderr, "tailproxy: error serving HTTP redirect: %v\n", err)
 				os.Exit(1)
