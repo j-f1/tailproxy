@@ -26,7 +26,7 @@ services:
       - TAILPROXY_TARGET=server:8080
       - TS_AUTHKEY=${TS_AUTHKEY}
     volumes:
-      - ./tailproxy-data:/data
+      - ./tailproxy-data:/home/nonroot/data
     links:
       - server
   server:
@@ -34,7 +34,7 @@ services:
     image: my-server-image
 ```
 
-Make sure to set a valid `TS_AUTHKEY` environment variable (see below) when running `docker compose up` to ensure that the proxy can join without requiring manual approval. While not required, it’s recommended to mount a volume to `/data` so that the proxy can persist its state between restarts, including SSL certificates. (Otherwise, you’ll have to wait for a new certificate to be generated every time you restart the proxy.)
+Make sure to set a valid `TS_AUTHKEY` environment variable (see below) when running `docker compose up` to ensure that the proxy can join without requiring manual approval. While not required, it’s recommended to mount a volume to `/home/nonroot/data` so that the proxy can persist its state between restarts, including SSL certificates. (Otherwise, you’ll have to wait for a new certificate to be generated every time you restart the proxy.)
 
 ## Configuration 
 

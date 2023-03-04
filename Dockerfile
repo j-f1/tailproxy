@@ -11,6 +11,6 @@ RUN CGO_ENABLED=0 go build tailproxy.go
 
 FROM cgr.dev/chainguard/static:latest
 ENV HOME /home/nonroot
-ENV TAILPROXY_DATA_DIR /data
+ENV TAILPROXY_DATA_DIR /home/nonroot/data
 COPY --from=build /work/tailproxy /tailproxy
 ENTRYPOINT ["/tailproxy"]
