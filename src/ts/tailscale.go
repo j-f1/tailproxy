@@ -15,12 +15,14 @@ import (
 	"tailscale.com/tsnet"
 )
 
-var s = new(tsnet.Server)
+var s *tsnet.Server
 var lc *tailscale.LocalClient
 
 func StartServer() {
-	s.Hostname = config.MachineName
-	s.Ephemeral = true
+	s = &tsnet.Server{
+		Hostname:  config.MachineName,
+		Ephemeral: true,
+	}
 	if len(config.DataDir) > 0 {
 		err := os.MkdirAll(path.Join(config.DataDir, "tailscale"), 0700)
 		if err != nil {
@@ -32,7 +34,7 @@ func StartServer() {
 	var err error
 	lc, err = s.LocalClient()
 	if err != nil {
-		logger.Fatal("error starting server: %v\n", err)
+		logger.Fatal("error getting local client: %v\n", err)
 	}
 
 	err = lc.StartLoginInteractive(context.Background())
@@ -51,6 +53,7 @@ func Status() *ipnstate.Status {
 
 func ShutdownServer() {
 	s.Close()
+	s = nil
 }
 
 func Listen(network, address string) net.Listener {
