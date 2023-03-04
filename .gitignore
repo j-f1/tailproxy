@@ -1,4 +1,3 @@
 /tailproxy
 .env
-docker-compose.yml
 tailproxy-data
