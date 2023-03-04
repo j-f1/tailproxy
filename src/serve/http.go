@@ -8,7 +8,7 @@ import (
 )
 
 func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
-	suffix, err := ts.MagicDNSSuffix()
+	suffix, err := ts.MagicDNSSuffix(r.Context())
 	if err != "" {
 		http.Error(w, err, http.StatusInternalServerError)
 	}

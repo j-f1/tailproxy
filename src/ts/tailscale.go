@@ -64,8 +64,8 @@ func Listen(network, address string) net.Listener {
 	return listener
 }
 
-func MagicDNSSuffix() (string, string) {
-	status, err := lc.Status(context.Background())
+func MagicDNSSuffix(ctx context.Context) (string, string) {
+	status, err := lc.Status(ctx)
 	if err != nil || status == nil {
 		logger.Err("error getting profile status: %v\n", err)
 		return "", fmt.Sprintf("error getting profile status: %v", err)
