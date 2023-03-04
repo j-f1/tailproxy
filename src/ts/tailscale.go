@@ -5,12 +5,14 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"path"
 	"tailproxy/src/config"
 	"tailproxy/src/logger"
 
 	"tailscale.com/client/tailscale"
+	"tailscale.com/client/tailscale/apitype"
 	"tailscale.com/ipn/ipnstate"
 	"tailscale.com/tsnet"
 )
@@ -75,6 +77,10 @@ func MagicDNSSuffix(ctx context.Context) (string, string) {
 		return "", "not logged in (CurrentTailnet is nil)"
 	}
 	return status.CurrentTailnet.MagicDNSSuffix, ""
+}
+
+func WhoIs(r *http.Request) (*apitype.WhoIsResponse, error) {
+	return lc.WhoIs(r.Context(), r.RemoteAddr)
 }
 
 func GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
