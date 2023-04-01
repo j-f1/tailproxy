@@ -4,6 +4,8 @@ FROM cgr.dev/chainguard/go:1.20 AS build
 WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
+
+FROM alpine AS certs
 RUN apk --update add ca-certificates
 
 # build
@@ -17,5 +19,5 @@ FROM scratch
 ENV HOME /home/nonroot
 ENV TAILPROXY_DATA_DIR /home/nonroot/data
 COPY --from=build /work/tailproxy /tailproxy
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/tailproxy"]
