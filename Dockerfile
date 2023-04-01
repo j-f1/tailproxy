@@ -5,14 +5,15 @@ WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
 
-FROM alpine AS certs
-RUN apk --update add ca-certificates
-
 # build
 COPY src ./src
 COPY tailproxy.go ./
 ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN CGO_ENABLED=0 go build -v tailproxy.go
+
+# certs
+FROM alpine AS certs
+RUN apk --update add ca-certificates
 
 # run
 FROM scratch
