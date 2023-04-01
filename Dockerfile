@@ -9,7 +9,7 @@ RUN go mod download
 COPY src ./src
 COPY tailproxy.go ./
 ARG TARGETOS TARGETARCH TARGETVARIANT
-RUN CGO_ENABLED=0 go build tailproxy.go
+RUN CGO_ENABLED=0 go build -v tailproxy.go
 
 # run
 FROM scratch
