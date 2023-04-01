@@ -4,6 +4,7 @@ FROM golang:1.20-alpine AS build
 WORKDIR /work
 COPY go.mod go.sum ./
 RUN go mod download
+RUN apk --update add ca-certificates
 
 # build
 COPY src ./src
@@ -16,4 +17,5 @@ FROM scratch
 ENV HOME /home/nonroot
 ENV TAILPROXY_DATA_DIR /home/nonroot/data
 COPY --from=build /work/tailproxy /tailproxy
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/tailproxy"]
