@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine AS build
+FROM cgr.dev/chainguard/go:1.20 AS build
 
 # deps
 WORKDIR /work
