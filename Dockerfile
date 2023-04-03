@@ -18,7 +18,6 @@ RUN apk --update add ca-certificates
 # run
 FROM scratch
 ENV HOME /home/nonroot
-ENV TAILPROXY_DATA_DIR /home/nonroot/data
 COPY --from=build /work/tailproxy /tailproxy
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/tailproxy"]

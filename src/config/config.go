@@ -42,4 +42,10 @@ func Parse() {
 	if FunnelMode == FunnelOnly && HTTPSMode != HTTPSOff {
 		logger.Log("note: HTTPS mode is ignored in Funnel-only mode.")
 	}
+
+	if DataDir == "" {
+		if _, err := os.Stat("/data"); err == nil {
+			DataDir = "/data"
+		}
+	}
 }

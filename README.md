@@ -45,7 +45,7 @@ You  are required to provide the following options:
 
 Additionally, you can set any environment variables that are supported by Tailscale. You’ll most likely want to set the `TS_AUTHKEY` environment variable to a valid [auth key](https://tailscale.com/kb/1085/auth-keys/) so that you don’t have to click the link to approve the new device every time you restart the proxy. Make sure to configure the auth key to provision ephemeral and pre-approved devices when creating it for the smoothest experience.
 
-You may optionally set `TAILPROXY_DATA_DIR` to a directory where the proxy can store its state. Currently, we’re just storing the Tailscale state (which is placed in the `tailscale` subdirectory of the directory you provide). If you don’t set this, Tailscale will use a subdirectory named `tsnet-tailproxy` in Go’s `os.UserConfigDir`.
+You may optionally set `TAILPROXY_DATA_DIR` to a directory where the proxy can store its state. Currently, we’re just storing the Tailscale state (which is placed in the `tailscale` subdirectory of the directory you provide). If you don’t set this, Tailscale will use `/data` if it exists, or a subdirectory named `tsnet-tailproxy` in Go’s `os.UserConfigDir` if `/data` does not exist.
 
 ### HTTPS
 
