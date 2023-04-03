@@ -8,7 +8,7 @@ import (
 )
 
 func ServePProf() {
-	httpListener := ts.Listen("tcp", 6060)
+	httpListener := ts.Listen(6060)
 	defer httpListener.Close()
 	if err := http.Serve(httpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
