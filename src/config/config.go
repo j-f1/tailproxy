@@ -40,6 +40,6 @@ func Parse() {
 	}
 
 	if FunnelMode == FunnelOnly && HTTPSMode != HTTPSOff {
-		logger.Log("note: https mode is ignored in funnel only mode.\n")
+		logger.Log("note: HTTPS mode is ignored in Funnel-only mode.\n")
 	}
 }
