@@ -58,10 +58,11 @@ func ShutdownServer() {
 	s = nil
 }
 
-func Listen(network, address string) net.Listener {
-	listener, err := s.Listen(network, address)
+func Listen(network string, port int) net.Listener {
+	addr := fmt.Sprintf(":%d", port)
+	listener, err := s.Listen(network, addr)
 	if err != nil {
-		logger.Fatal("error listening for %s on %s: %v\n", network, address, err)
+		logger.Fatal("error listening for %s on port %v: %v\n", network, port, err)
 	}
 	return listener
 }

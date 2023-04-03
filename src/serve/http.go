@@ -17,7 +17,7 @@ func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
 }
 
 func ServeHTTP() {
-	httpListener := ts.Listen("tcp", ":80")
+	httpListener := ts.Listen("tcp", 80)
 	defer httpListener.Close()
 	if config.HTTPSMode == config.HTTPSRedirect {
 		if err := http.Serve(httpListener, http.HandlerFunc(redirectToHTTPS)); err != nil {
