@@ -14,11 +14,16 @@ func main() {
 	ts.StartServer()
 	defer ts.ShutdownServer()
 
-	if config.HTTPSMode != config.HTTPSOnly {
-		go serve.ServeHTTP()
+	if config.FunnelMode != config.FunnelOff {
+		go serve.ServeFunnel()
 	}
-	if config.HTTPSMode != config.HTTPSOff {
-		go serve.ServeHTTPS()
+	if config.FunnelMode != config.FunnelOnly {
+		if config.HTTPSMode != config.HTTPSOnly {
+			go serve.ServeHTTP()
+		}
+		if config.HTTPSMode != config.HTTPSOff {
+			go serve.ServeHTTPS()
+		}
 	}
 	if config.PProf {
 		go serve.ServePProf()
