@@ -18,16 +18,23 @@ const (
 	HTTPSBoth
 )
 
+const (
+	httpsOff      = "off"
+	httpsRedirect = "redirect"
+	httpsOnly     = "only"
+	httpsBoth     = "both"
+)
+
 func (m HTTPSModeValue) String() string {
 	switch m {
 	case HTTPSOff:
-		return "off"
+		return httpsOff
 	case HTTPSRedirect:
-		return "redirect"
+		return httpsRedirect
 	case HTTPSOnly:
-		return "only"
+		return httpsOnly
 	case HTTPSBoth:
-		return "both"
+		return httpsBoth
 	default:
 		return fmt.Sprintf("unknown https mode %d", m)
 	}
@@ -35,16 +42,16 @@ func (m HTTPSModeValue) String() string {
 
 func parseHTTPSMode(s string) HTTPSModeValue {
 	switch s {
-	case "off":
+	case httpsOff:
 		return HTTPSOff
-	case "redirect":
+	case httpsRedirect:
 		return HTTPSRedirect
-	case "only":
+	case httpsOnly:
 		return HTTPSOnly
-	case "both":
+	case httpsBoth:
 		return HTTPSBoth
 	default:
-		logger.Fatal("invalid https mode %q", s)
+		logger.Fatal("unknown https mode %q", s)
 		return -1
 	}
 }
