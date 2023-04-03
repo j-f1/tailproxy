@@ -79,7 +79,10 @@ The proxy will set several headers on the request it sends to the upstream serve
 - `X-Forwarded-For`: the IP address of the device making the request
 - `X-Forwarded-Host`: the hostname of the proxy (according to the client making the request)
 - `X-Forwarded-Proto`: the protocol used to make the request (either `http` or `https`)
-- `X-Tailscale-WhoIs`: either `ok` if the below headers are present, or `error` if the call to Tailscale failed
+- `X-Tailscale-WhoIs`:
+  - `ok` if the request came from a Tailscale device. The below headers identify the device and its owner.
+  - `funnel` if the request came from Funnel. The below headers will not be present, since Funnel does not authenticate the request.
+  - `error` if the call to Tailscale failed. The below headers will not be present. This is unlikely to happen, and if you rely on authentication, you should probably return an error to the client in this case. We don’t handle this in tailproxy to give you flexibility to continue on if you don’t care about authentication. Check your server logs and report a bug if this happens to you!
 - `X-Tailscale-User`: the unique user ID of the owner of the device making the request
 - `X-Tailscale-User-LoginName`: the login name (`j-f1@github`) of the user
 - `X-Tailscale-User-DisplayName` the display name (`Jed Fox`) of the user

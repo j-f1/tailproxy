@@ -18,7 +18,7 @@ func ServeHTTPS() {
 		},
 	})
 	defer httpsListener.Close()
-	if err := http.Serve(httpsListener, makeProxy()); err != nil {
+	if err := http.Serve(httpsListener, makeProxy(false)); err != nil {
 		logger.Fatal("error serving HTTPS: %v\n", err)
 	}
 }

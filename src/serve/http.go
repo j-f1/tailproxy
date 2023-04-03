@@ -24,7 +24,7 @@ func ServeHTTP() {
 			logger.Fatal("error serving HTTP redirect: %v\n", err)
 		}
 	} else {
-		if err := http.Serve(httpListener, makeProxy()); err != nil {
+		if err := http.Serve(httpListener, makeProxy(false)); err != nil {
 			logger.Fatal("error serving HTTP: %v\n", err)
 		}
 	}

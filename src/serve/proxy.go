@@ -12,7 +12,7 @@ import (
 	"tailscale.com/client/tailscale/apitype"
 )
 
-func makeProxy() http.Handler {
+func makeProxy(isFunnel bool) http.Handler {
 	var start time.Time
 	return &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
@@ -22,18 +22,23 @@ func makeProxy() http.Handler {
 			r.SetURL(config.Target)
 			r.Out.Host = r.In.Host
 
-			who, err := ts.WhoIs(r.In)
 			for k := range r.Out.Header {
 				if strings.HasPrefix(k, "X-Tailscale-") {
 					r.Out.Header.Del(k)
 				}
 			}
-			if err != nil {
-				fmt.Printf("error getting whois: %v\n", err)
-				r.Out.Header.Set("X-Tailscale-WhoIs", "error")
+
+			if isFunnel {
+				r.Out.Header.Set("X-Tailscale-WhoIs", "funnel")
 			} else {
-				r.Out.Header.Set("X-Tailscale-WhoIs", "ok")
-				setWhoIsHeaders(*who, r.Out.Header)
+				who, err := ts.WhoIs(r.In)
+				if err != nil {
+					fmt.Printf("error getting whois: %v\n", err)
+					r.Out.Header.Set("X-Tailscale-WhoIs", "error")
+				} else {
+					r.Out.Header.Set("X-Tailscale-WhoIs", "ok")
+					setWhoIsHeaders(*who, r.Out.Header)
+				}
 			}
 		},
 		ModifyResponse: func(r *http.Response) error {
