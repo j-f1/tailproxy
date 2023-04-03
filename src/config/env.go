@@ -43,7 +43,7 @@ func loadConfigFromEnv() []string {
 		var err error
 		Target, err = url.Parse("http://" + os.Getenv(envTarget))
 		if err != nil {
-			logger.Fatal("invalid target: %v\n", err)
+			logger.Fatal("invalid target: %v", err)
 		}
 	} else {
 		optionsMissing = append(optionsMissing, envTarget)

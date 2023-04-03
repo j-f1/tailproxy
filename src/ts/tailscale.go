@@ -28,7 +28,7 @@ func StartServer() {
 	if len(config.DataDir) > 0 {
 		err := os.MkdirAll(path.Join(config.DataDir, "tailscale"), 0700)
 		if err != nil {
-			logger.Fatal("error creating data dir: %v\n", err)
+			logger.Fatal("error creating data dir: %v", err)
 		}
 		s.Dir = path.Join(config.DataDir, "tailscale")
 	}
@@ -36,19 +36,19 @@ func StartServer() {
 	var err error
 	lc, err = s.LocalClient()
 	if err != nil {
-		logger.Fatal("error getting local client: %v\n", err)
+		logger.Fatal("error getting local client: %v", err)
 	}
 
 	err = lc.StartLoginInteractive(context.Background())
 	if err != nil {
-		logger.Fatal("error starting login: %v\n", err)
+		logger.Fatal("error starting login: %v", err)
 	}
 }
 
 func Status() *ipnstate.Status {
 	status, err := lc.Status(context.Background())
 	if err != nil || status == nil {
-		logger.Fatal("error getting profile status: %v\n", err)
+		logger.Fatal("error getting profile status: %v", err)
 	}
 	return status
 }
@@ -72,7 +72,7 @@ func listen(port int, onFunnel bool) net.Listener {
 
 	status, err := lc.Status(context.Background())
 	if err != nil || status == nil {
-		logger.Fatal("error getting profile status: %v\n", err)
+		logger.Fatal("error getting profile status: %v", err)
 	}
 
 	var listener net.Listener
@@ -84,9 +84,9 @@ func listen(port int, onFunnel bool) net.Listener {
 
 	if err != nil {
 		if onFunnel {
-			logger.Fatal("error listening for %s on port %v (funnel): %v\n", network, port, err)
+			logger.Fatal("error listening for %s on port %v (funnel): %v", network, port, err)
 		} else {
-			logger.Fatal("error listening for %s on port %v: %v\n", network, port, err)
+			logger.Fatal("error listening for %s on port %v: %v", network, port, err)
 		}
 	}
 	return listener
@@ -95,11 +95,11 @@ func listen(port int, onFunnel bool) net.Listener {
 func MagicDNSSuffix(ctx context.Context) (string, string) {
 	status, err := lc.Status(ctx)
 	if err != nil || status == nil {
-		logger.Err("error getting profile status: %v\n", err)
+		logger.Err("error getting profile status: %v", err)
 		return "", fmt.Sprintf("error getting profile status: %v", err)
 	}
 	if status.CurrentTailnet == nil {
-		logger.Err("not logged in (CurrentTailnet is nil)\n")
+		logger.Err("not logged in (CurrentTailnet is nil)")
 		return "", "not logged in (CurrentTailnet is nil)"
 	}
 	return status.CurrentTailnet.MagicDNSSuffix, ""

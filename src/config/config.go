@@ -35,11 +35,11 @@ func Parse() {
 
 	optionsMissing := loadConfigFromEnv()
 	if len(optionsMissing) > 0 {
-		logger.Err("info: missing environment variable: %v. Using command line flags instead.\n", optionsMissing)
+		logger.Err("info: missing environment variable: %v. Using command line flags instead.", optionsMissing)
 		loadConfigFromCLI()
 	}
 
 	if FunnelMode == FunnelOnly && HTTPSMode != HTTPSOff {
-		logger.Log("note: HTTPS mode is ignored in Funnel-only mode.\n")
+		logger.Log("note: HTTPS mode is ignored in Funnel-only mode.")
 	}
 }
