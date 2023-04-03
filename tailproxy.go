@@ -9,7 +9,7 @@ import (
 
 func main() {
 	config.Parse()
-	logger.Log("connecting as %s, forwarding to %v. HTTPS mode: %s. Storing data in: '%s'", config.MachineName, config.Target, config.HTTPSMode, config.DataDir)
+	logger.Log("connecting as %s (funnel %s), forwarding to %v. HTTPS mode: %s. Storing data in: '%s'", config.MachineName, config.FunnelMode, config.Target, config.HTTPSMode, config.DataDir)
 
 	ts.StartServer()
 	defer ts.ShutdownServer()
