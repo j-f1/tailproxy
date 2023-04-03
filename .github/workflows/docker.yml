@@ -47,4 +47,4 @@ jobs:
           echo "::endgroup::"
           echo "tags=$(cat tags.txt)" >> $GITHUB_OUTPUT
 
-      - run: ko build --bare --tags=${{ steps.tags.outputs.tags }} --platform=all
+      - run: ko build --bare --tags=${{ steps.tags.outputs.tags }} --platform=all --sbom=none
