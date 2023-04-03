@@ -83,7 +83,7 @@ The proxy will set several headers on the request it sends to the upstream serve
 - `X-Tailscale-User`: the unique user ID of the owner of the device making the request
 - `X-Tailscale-User-LoginName`: the login name (`j-f1@github`) of the user
 - `X-Tailscale-User-DisplayName` the display name (`Jed Fox`) of the user
-- `X-Tailscale-User-ProfilePicURL` the URL of the user’s profile picture
+- `X-Tailscale-User-ProfilePicURL` the URL of the user’s profile picture (if available)
 - `X-Tailscale-Caps` a comma-separated list of capabilities the user has (if any)
 - `X-Tailscale-Node` the unique ID of the device making the request
 - `X-Tailscale-Node-Name` the machine name of the device making the request (with the tailnet name appended if the device has been shared from another tailnet)

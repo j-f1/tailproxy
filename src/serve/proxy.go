@@ -34,7 +34,9 @@ func makeProxy() http.Handler {
 				r.Out.Header.Set("X-Tailscale-User", who.UserProfile.ID.String())
 				r.Out.Header.Set("X-Tailscale-User-LoginName", who.UserProfile.LoginName)
 				r.Out.Header.Set("X-Tailscale-User-DisplayName", who.UserProfile.DisplayName)
-				r.Out.Header.Set("X-Tailscale-User-ProfilePicURL", who.UserProfile.ProfilePicURL)
+				if who.UserProfile.ProfilePicURL != "" {
+					r.Out.Header.Set("X-Tailscale-User-ProfilePicURL", who.UserProfile.ProfilePicURL)
+				}
 
 				if len(who.Caps) > 0 {
 					r.Out.Header.Set("X-Tailscale-Caps", strings.Join(who.Caps, ", "))
