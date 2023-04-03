@@ -20,7 +20,7 @@ Use the package `ghcr.io/j-f1/tailproxy` in your `docker-compose.yml`:
 version: '3'
 services:
   tailproxy:
-    image: ghcr.io/j-f1/tailproxy:edge
+    image: ghcr.io/j-f1/tailproxy:v1
     environment:
       - TAILPROXY_NAME=myhost
       - TAILPROXY_TARGET=server:8080
@@ -34,13 +34,13 @@ services:
     image: my-server-image
 ```
 
-Make sure to set a valid `TS_AUTHKEY` environment variable (see below) when running `docker compose up` to ensure that the proxy can join without requiring manual approval. While not required, it’s recommended to mount a volume to `/home/nonroot/data` so that the proxy can persist its state between restarts, including SSL certificates. (Otherwise, you’ll have to wait for a new certificate to be generated every time you restart the proxy.)
+Make sure to set a valid `TS_AUTHKEY` environment variable (see below) when running `docker compose up` to ensure that the proxy can join without requiring manual approval. While not required, it’s recommended to mount a volume to `/home/nonroot/data` so that the proxy can persist its state between restarts, including TLS certificates. (Otherwise, you’ll have to wait for a new certificate to be generated every time you restart the proxy.)
 
 ## Configuration 
 
 You  are required to provide the following options:
 
-- The machine name (env variable: `TAILPROXY_NAME` or first argument to the CLI) to join your tailnet as
+- The machine name (env variable: `TAILPROXY_NAME` or first argument to the CLI) to join your tailnet as. Note that Tailscale will automatically add a `-<number>` suffix to the name if it’s already taken.
 - The target to proxy to (env variable: `TAILPROXY_TARGET` or second argument to the CLI). Format it as `host` (to use the default port 80) `host:port` or `host:port/basepath?foo=bar` (in which case `/basepath` will be prepended to all requests to the upstream server and prepend `?foo=bar` to the query string of all requests).
 
 Additionally, you can set any environment variables that are supported by Tailscale. You’ll most likely want to set the `TS_AUTHKEY` environment variable to a valid [auth key](https://tailscale.com/kb/1085/auth-keys/) so that you don’t have to click the link to approve the new device every time you restart the proxy. Make sure to configure the auth key to provision ephemeral and pre-approved devices when creating it for the smoothest experience.
@@ -60,13 +60,15 @@ If HTTPS is enabled, tailproxy will use Tailscale’s API to generate a valid ce
 
 ### Funnel
 
+> **Warning**: Tailproxy is relatively safe because it’s only accessible from devices you control. However, Funnel allows anyone from the Internet to talk to your server. That means you have to worry about both the security of Tailproxy and of your server. I don’t know about you, but I don’t really know what I’m doing so besides the inherent safety of Go and the relative simplicity of my code I can’t guarantee that there aren’t any security issues. Use Funnel at your own risk.
+
 You can optionally make the service behind tailproxy publicly accessible using [Tailscale Funnel](https://tailscale.com/kb/1223/tailscale-funnel/) (`--funnel` in the CLI or `TAILPROXY_FUNNEL_MODE` as an environment variable). The following values are allowed:
 
-- `off` (default): No Funnel support. The proxy will only listen on the Tailscale network.
-- `on`: The proxy will listen on both the Tailscale network and the public internet.
-- `only`: The proxy will listen for requests on the public internet. Requests to the Tailscale network will not be accepted.
+- `off` (default): No Funnel support. The proxy will only listen on your tailnet.
+- `on`: The proxy will listen on both your tailnet and the public internet.
+- `only`: The proxy will listen for requests only on the public internet. Requests on your tailnet will not be accepted.
 
-Note that you’ll have to enable Funnel for your tailnet, and make sure that the tailproxy node has the `funnel` attribute in `nodeAttrs`. Funnel handles the TLS termination, so the HTTPS mode will be ignored for connections coming from Funnel.
+Note that you’ll have to enable Funnel for your tailnet, and make sure that the tailproxy node has the `funnel` attribute in `nodeAttrs`. Funnel handles the TLS termination, so the HTTPS config option will be ignored for connections coming from Funnel.
 
 ### Debugging/Profiling
 
