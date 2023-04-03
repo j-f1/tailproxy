@@ -6,6 +6,7 @@ services:
     build: .
     environment:
       - TAILPROXY_HTTPS_MODE=${TAILPROXY_HTTPS_MODE}
+      - TAILPROXY_FUNNEL_MODE=${TAILPROXY_FUNNEL_MODE}
       - TAILPROXY_NAME=tailproxy
       - TAILPROXY_TARGET=test_server:8000
       - TAILPROXY_PPROF_ENABLED=${TAILPROXY_PPROF_ENABLED}

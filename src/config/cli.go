@@ -9,6 +9,7 @@ import (
 
 var (
 	https   = flag.String("https", "off", "HTTPS mode (off, on, only, both)")
+	funnel  = flag.String("funnel", "off", "funnel mode (off, on, only)")
 	dataDir = flag.String("data-dir", "", "data directory")
 	pprof   = flag.Bool("pprof", false, "enable pprof")
 )
@@ -27,6 +28,7 @@ func loadConfigFromCLI() {
 	}
 
 	HTTPSMode = parseHTTPSMode(*https)
+	FunnelMode = parseFunnelMode(*funnel)
 	DataDir = *dataDir
 	PProf = *pprof
 }

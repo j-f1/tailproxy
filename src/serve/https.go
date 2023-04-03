@@ -9,7 +9,7 @@ import (
 )
 
 func ServeHTTPS() {
-	tcpListener := ts.Listen(443)
+	tcpListener := ts.ListenTailnet(443)
 	httpsListener := tls.NewListener(tcpListener, &tls.Config{
 		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 			start := time.Now()

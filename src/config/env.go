@@ -8,6 +8,7 @@ import (
 
 const (
 	envHTTPSMode = "TAILPROXY_HTTPS_MODE"
+	envFunnel    = "TAILPROXY_FUNNEL_MODE"
 	envName      = "TAILPROXY_NAME"
 	envTarget    = "TAILPROXY_TARGET"
 	envPProf     = "TAILPROXY_PPROF_ENABLED"
@@ -18,6 +19,10 @@ func loadConfigFromEnv() []string {
 	var optionsMissing []string
 	if os.Getenv(envHTTPSMode) != "" {
 		HTTPSMode = parseHTTPSMode(os.Getenv(envHTTPSMode))
+	}
+
+	if os.Getenv(envFunnel) != "" {
+		FunnelMode = parseFunnelMode(os.Getenv(envFunnel))
 	}
 
 	if os.Getenv(envPProf) != "" {

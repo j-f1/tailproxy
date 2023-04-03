@@ -58,9 +58,19 @@ You can optionally  pass an option to enable HTTPS support (`--https` in the CLI
 
 If HTTPS is enabled, tailproxy will use Tailscale’s API to generate a valid certificate for `<host>.<tailnet name>.ts.net`. It will strip HTTPS and forward the plain HTTP request to the upstream server.
 
+### Funnel
+
+You can optionally make the service behind tailproxy publicly accessible using [Tailscale Funnel](https://tailscale.com/kb/1223/tailscale-funnel/) (`--funnel` in the CLI or `TAILPROXY_FUNNEL_MODE` as an environment variable). The following values are allowed:
+
+- `off` (default): No Funnel support. The proxy will only listen on the Tailscale network.
+- `on`: The proxy will listen on both the Tailscale network and the public internet.
+- `only`: The proxy will listen for requests on the public internet. Requests to the Tailscale network will not be accepted. You must set HTTPS to `only` if you use this mode.
+
+Note that you’ll have to enable Funnel for your tailnet, and make sure that the tailproxy node has the `funnel` attribute in `nodeAttrs`. You’ll also be required to enable HTTPS support (see above) if you want to use Funnel, since Tailscale does not currently allow plaintext HTTP requests to be forwarded through Funnel. 
+
 ### Debugging/Profiling
 
-If you pass `TAILPROXY_PPROF_ENABLED=1` (or `--pprof`), the proxy will expose a pprof server on port 6060 (on your tailnet). You can use this to debug performance issues or to profile the proxy.
+If you pass `TAILPROXY_PPROF_ENABLED=1` (or `--pprof`), the proxy will expose a pprof server on port 6060 (on your tailnet). You can use this to debug performance issues or to profile the proxy. Note that the pprof server cannot be accessed over Funnel, and this option must be disabled if you are only listening on Funnel.
 
 ## Proxy functionality
 

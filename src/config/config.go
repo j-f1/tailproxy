@@ -10,6 +10,7 @@ import (
 
 var (
 	HTTPSMode   = HTTPSOff
+	FunnelMode  = FunnelOff
 	MachineName string
 	Target      *url.URL
 	PProf       = false
@@ -36,5 +37,18 @@ func Parse() {
 	if len(optionsMissing) > 0 {
 		logger.Err("info: missing environment variable: %v. Using command line flags instead.\n", optionsMissing)
 		loadConfigFromCLI()
+	}
+
+	if FunnelMode != FunnelOff && HTTPSMode == HTTPSOff {
+		logger.Fatal("funnel requires HTTPS, but HTTPS is disabled.\n")
+		os.Exit(1)
+	}
+	if FunnelMode == FunnelOnly && HTTPSMode != HTTPSOnly {
+		logger.Fatal("funnel only mode requires HTTPS only mode.\n")
+		os.Exit(1)
+	}
+	if FunnelMode == FunnelOnly && PProf {
+		logger.Fatal("funnel only mode does not support pprof.\n")
+		os.Exit(1)
 	}
 }

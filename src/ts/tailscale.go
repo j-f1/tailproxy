@@ -59,9 +59,33 @@ func ShutdownServer() {
 }
 
 func Listen(port int) net.Listener {
+	return listen(port, false)
+}
+
+func ListenTailnetOnly(port int) net.Listener {
+	return listen(port, true)
+}
+
+func listen(port int, tailnetOnly bool) net.Listener {
 	addr := fmt.Sprintf(":%d", port)
 	network := "tcp"
-	listener, err := s.Listen(network, addr)
+
+	status, err := lc.Status(context.Background())
+	if err != nil || status == nil {
+		logger.Fatal("error getting profile status: %v\n", err)
+	}
+
+	var listener net.Listener
+	if config.FunnelMode != config.FunnelOff && !tailnetOnly {
+		if config.FunnelMode == config.FunnelOnly {
+			listener, err = s.ListenFunnel(network, addr, tsnet.FunnelOnly())
+		} else {
+			listener, err = s.ListenFunnel(network, addr)
+		}
+	} else {
+		listener, err = s.Listen(network, addr)
+	}
+
 	if err != nil {
 		logger.Fatal("error listening for %s on port %v: %v\n", network, port, err)
 	}
