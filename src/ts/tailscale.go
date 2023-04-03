@@ -48,7 +48,7 @@ func StartServer() {
 func Status() *ipnstate.Status {
 	status, err := lc.Status(context.Background())
 	if err != nil || status == nil {
-		logger.Fatal("error getting profile status: %v", err)
+		logger.Fatal("error getting status: %v", err)
 	}
 	return status
 }
@@ -70,26 +70,20 @@ func listen(port int, onFunnel bool) net.Listener {
 	addr := fmt.Sprintf(":%d", port)
 	network := "tcp"
 
-	status, err := lc.Status(context.Background())
-	if err != nil || status == nil {
-		logger.Fatal("error getting profile status: %v", err)
-	}
-
-	var listener net.Listener
 	if onFunnel {
-		listener, err = s.ListenFunnel(network, addr, tsnet.FunnelOnly())
-	} else {
-		listener, err = s.Listen(network, addr)
-	}
-
-	if err != nil {
-		if onFunnel {
+		listener, err := s.ListenFunnel(network, addr, tsnet.FunnelOnly())
+		if err != nil {
 			logger.Fatal("error listening for %s on port %v (funnel): %v", network, port, err)
-		} else {
+		}
+		return listener
+	} else {
+		listener, err := s.Listen(network, addr)
+		if err != nil {
 			logger.Fatal("error listening for %s on port %v: %v", network, port, err)
 		}
+		return listener
 	}
-	return listener
+
 }
 
 func MagicDNSSuffix(ctx context.Context) (string, string) {
