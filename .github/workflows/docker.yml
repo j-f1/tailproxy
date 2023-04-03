@@ -38,8 +38,10 @@ jobs:
 
       - name: Rewrite tags
         id: tags
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          echo ${{ steps.meta.outputs.tags }} | awk -F: '{print $2}' | paste -sd, - > tags.txt
+          echo "$TAGS" | awk -F: '{print $2}' | paste -sd, - > tags.txt
           echo "::group::Tags"
           cat tags.txt
           echo "::endgroup::"
