@@ -14,10 +14,6 @@ func main() {
 	ts.StartServer()
 	defer ts.ShutdownServer()
 
-	if ts.Status().Self.HostName != config.MachineName {
-		logger.Log("warning: Tailscale has assigned a different name to this machine: %s", ts.Status().Self.HostName)
-	}
-
 	if config.FunnelMode != config.FunnelOff {
 		go serve.ServeFunnel()
 	}
