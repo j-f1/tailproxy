@@ -36,4 +36,9 @@ jobs:
             type=edge,value=edge
             type=sha
 
-      - run: ko build --bare --tags=${{ steps.meta.outputs.tags }} --platform=all
+      - name: Rewrite tags
+        id: tags
+        run: |
+          echo "::set-output name=tags::$(echo ${{ steps.meta.outputs.tags }} | awk -F: '{print $2}' | paste -sd, -)"
+
+      - run: ko build --bare --tags=${{ steps.tags.outputs.tags }} --platform=all
