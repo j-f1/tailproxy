@@ -1,0 +1,43 @@
+name: Update Go Dependencies
+
+on:
+  schedule:
+    # Every week
+    - cron: 0 0 * * 0
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    name: Update Go Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - run: go get -u ./...
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [[ -n $(git status -s) ]]; then
+            echo changed=1 >> $GITHUB_OUTPUT
+          else
+            echo changed=0 >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes
+        if: steps.changes.outputs.changed == 1
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add go.mod go.sum
+          git commit -m "Update Go dependencies"
+          git push
