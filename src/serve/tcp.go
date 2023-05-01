@@ -27,7 +27,7 @@ func ServeTCP() error {
 		Port: port,
 	}
 
-	listener := ts.ListenFunnel(443)
+	listener := ts.ListenTailnet(port)
 	defer listener.Close()
 	for {
 		conn, err := listener.Accept()
