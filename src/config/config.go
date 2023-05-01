@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 	"tailproxy/src/logger"
 )
 
@@ -47,5 +48,16 @@ func Parse() {
 		if _, err := os.Stat("/data"); err == nil {
 			DataDir = "/data"
 		}
+	}
+}
+
+func parseTarget(target string) {
+	if !strings.Contains(target, "://") {
+		target = "http://" + target
+	}
+	var err error
+	Target, err = url.Parse(target)
+	if err != nil {
+		logger.Fatal("invalid target: %v", err)
 	}
 }

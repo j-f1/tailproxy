@@ -1,9 +1,7 @@
 package config
 
 import (
-	"net/url"
 	"os"
-	"tailproxy/src/logger"
 )
 
 const (
@@ -40,11 +38,7 @@ func loadConfigFromEnv() []string {
 	}
 
 	if os.Getenv(envTarget) != "" {
-		var err error
-		Target, err = url.Parse("http://" + os.Getenv(envTarget))
-		if err != nil {
-			logger.Fatal("invalid target: %v", err)
-		}
+		parseTarget(os.Getenv(envTarget))
 	} else {
 		optionsMissing = append(optionsMissing, envTarget)
 	}

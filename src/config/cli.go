@@ -2,9 +2,6 @@ package config
 
 import (
 	"flag"
-	"fmt"
-	"net/url"
-	"os"
 )
 
 var (
@@ -20,12 +17,7 @@ func loadConfigFromCLI() {
 	}
 
 	MachineName = flag.Arg(0)
-	var err error
-	Target, err = url.Parse("http://" + flag.Arg(1))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "tailproxy: invalid target: %v\n", err)
-		flag.Usage()
-	}
+	parseTarget(flag.Arg(1))
 
 	HTTPSMode = parseHTTPSMode(*https)
 	FunnelMode = parseFunnelMode(*funnel)

@@ -18,11 +18,15 @@ func main() {
 		go serve.ServeFunnel()
 	}
 	if config.FunnelMode != config.FunnelOnly {
-		if config.HTTPSMode != config.HTTPSOnly {
-			go serve.ServeHTTP()
-		}
-		if config.HTTPSMode != config.HTTPSOff {
-			go serve.ServeHTTPS()
+		if config.Target.Scheme == "tcp" {
+			go serve.ServeTCP()
+		} else {
+			if config.HTTPSMode != config.HTTPSOnly {
+				go serve.ServeHTTP()
+			}
+			if config.HTTPSMode != config.HTTPSOff {
+				go serve.ServeHTTPS()
+			}
 		}
 	}
 	if config.PProf {
