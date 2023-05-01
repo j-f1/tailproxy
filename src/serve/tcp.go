@@ -16,39 +16,27 @@ func ServeTCP() error {
 		return err
 	}
 
-	ip, err := net.ResolveIPAddr("ip", config.Target.Hostname())
-	if err != nil {
-		logger.Fatal("invalid target hostname: %v", err)
-		return err
-	}
-
-	addr := &net.TCPAddr{
-		IP:   ip.IP,
-		Port: port,
-	}
-
 	listener := ts.ListenTailnet(port)
 	defer listener.Close()
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			logger.Fatal("error accepting connection: %v", err)
+			logger.Err("error accepting connection: %v", err)
+		} else {
+			go handleTCP(conn)
 		}
-		go handleTCP(conn, addr)
 	}
 }
 
-func handleTCP(conn net.Conn, addr *net.TCPAddr) {
+func handleTCP(conn net.Conn) {
 	defer conn.Close()
-	proxied, err := net.DialTCP("tcp", nil, addr)
+	destConn, err := net.Dial("tcp", config.Target.Host)
 	if err != nil {
 		logger.Err("error connecting to target: %v", err)
 		return
 	}
-	logger.Log("connected to target %v", addr)
-	defer proxied.Close()
-	go io.Copy(proxied, conn)
-	io.Copy(conn, proxied)
-	logger.Log("disconnected from target %v", addr)
+	defer destConn.Close()
+	go io.Copy(destConn, conn)
+	io.Copy(conn, destConn)
 	select {}
 }
