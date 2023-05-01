@@ -47,6 +47,12 @@ Additionally, you can set any environment variables that are supported by Tailsc
 
 You may optionally set `TAILPROXY_DATA_DIR` to a directory where the proxy can store its state. Currently, we’re just storing the Tailscale state (which is placed in the `tailscale` subdirectory of the directory you provide). If you don’t set this, Tailscale will use `/data` if it exists, or a subdirectory named `tsnet-tailproxy` in Go’s `os.UserConfigDir` if `/data` does not exist.
 
+### Raw TCP proxying
+
+If you write your target as `tcp://host:port`, tailproxy will proxy TCP connections to the specified host and port. This is useful if you want to proxy a non-HTTP server, such as a database. The port is required since there isn’t a default port for TCP connections.
+
+Note that HTTPS/TLS and therefore Funnel are not supported because they require TLS termination, which has not been implemented for raw TCP connections. (PRs welcome! You would probably need to rethink the `https` option to make it work for raw TLS as well as HTTPS.)
+
 ### HTTPS
 
 You can optionally  pass an option to enable HTTPS support (`--https` in the CLI or `TAILPROXY_HTTPS_MODE` as an environment variable). The following values are allowed:
