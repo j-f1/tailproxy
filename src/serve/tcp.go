@@ -45,7 +45,10 @@ func handleTCP(conn net.Conn, addr *net.TCPAddr) {
 		logger.Err("error connecting to target: %v", err)
 		return
 	}
+	logger.Log("connected to target %v", addr)
 	defer proxied.Close()
 	go io.Copy(proxied, conn)
 	io.Copy(conn, proxied)
+	logger.Log("disconnected from target %v", addr)
+	select {}
 }
