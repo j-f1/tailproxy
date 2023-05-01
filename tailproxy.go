@@ -14,13 +14,13 @@ func main() {
 	ts.StartServer()
 	defer ts.ShutdownServer()
 
-	if config.FunnelMode != config.FunnelOff {
-		go serve.ServeFunnel()
-	}
-	if config.FunnelMode != config.FunnelOnly {
-		if config.Target.Scheme == "tcp" {
-			go serve.ServeTCP()
-		} else {
+	if config.Target.Scheme == "tcp" {
+		go serve.ServeTCP()
+	} else {
+		if config.FunnelMode != config.FunnelOff {
+			go serve.ServeFunnel()
+		}
+		if config.FunnelMode != config.FunnelOnly {
 			if config.HTTPSMode != config.HTTPSOnly {
 				go serve.ServeHTTP()
 			}
@@ -29,6 +29,7 @@ func main() {
 			}
 		}
 	}
+
 	if config.PProf {
 		go serve.ServePProf()
 	}
