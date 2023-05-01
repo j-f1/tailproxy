@@ -37,7 +37,7 @@ func makeProxy(isFunnel bool) http.Handler {
 					r.Out.Header.Set("X-Tailscale-WhoIs", "error")
 				} else {
 					r.Out.Header.Set("X-Tailscale-WhoIs", "ok")
-					setWhoIsHeaders(*who, r.Out.Header)
+					setWhoIsHeaders(who, r.Out.Header)
 				}
 			}
 		},
@@ -48,7 +48,7 @@ func makeProxy(isFunnel bool) http.Handler {
 	}
 }
 
-func setWhoIsHeaders(who apitype.WhoIsResponse, h http.Header) {
+func setWhoIsHeaders(who *apitype.WhoIsResponse, h http.Header) {
 	h.Set("X-Tailscale-User", who.UserProfile.ID.String())
 	h.Set("X-Tailscale-User-LoginName", who.UserProfile.LoginName)
 	h.Set("X-Tailscale-User-DisplayName", who.UserProfile.DisplayName)

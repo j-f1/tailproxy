@@ -7,9 +7,9 @@ import (
 )
 
 func ServeFunnel() {
-	httpListener := ts.ListenFunnel(443)
-	defer httpListener.Close()
-	if err := http.Serve(httpListener, makeProxy(true)); err != nil {
+	tcpListener := ts.ListenFunnel(443)
+	defer tcpListener.Close()
+	if err := http.Serve(tcpListener, makeProxy(true)); err != nil {
 		logger.Fatal("error serving to Funnel: %v", err)
 	}
 }

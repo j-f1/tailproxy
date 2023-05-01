@@ -9,11 +9,11 @@ import (
 
 func ServeHTTPS() {
 	tcpListener := ts.ListenTailnet(443)
-	httpsListener := tls.NewListener(tcpListener, &tls.Config{
+	tlsListener := tls.NewListener(tcpListener, &tls.Config{
 		GetCertificate: ts.GetCertificate,
 	})
-	defer httpsListener.Close()
-	if err := http.Serve(httpsListener, makeProxy(false)); err != nil {
+	defer tlsListener.Close()
+	if err := http.Serve(tlsListener, makeProxy(false)); err != nil {
 		logger.Fatal("error serving HTTPS: %v", err)
 	}
 }

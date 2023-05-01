@@ -8,9 +8,9 @@ import (
 )
 
 func ServePProf() {
-	httpListener := ts.ListenTailnet(6060)
-	defer httpListener.Close()
-	if err := http.Serve(httpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	tcpListener := ts.ListenTailnet(6060)
+	defer tcpListener.Close()
+	if err := http.Serve(tcpListener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			http.Redirect(w, r, "/debug/pprof/", http.StatusFound)
 		} else {

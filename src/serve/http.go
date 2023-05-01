@@ -17,14 +17,14 @@ func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
 }
 
 func ServeHTTP() {
-	httpListener := ts.ListenTailnet(80)
-	defer httpListener.Close()
+	tcpListener := ts.ListenTailnet(80)
+	defer tcpListener.Close()
 	if config.HTTPSMode == config.HTTPSRedirect {
-		if err := http.Serve(httpListener, http.HandlerFunc(redirectToHTTPS)); err != nil {
+		if err := http.Serve(tcpListener, http.HandlerFunc(redirectToHTTPS)); err != nil {
 			logger.Fatal("error serving HTTP redirect: %v", err)
 		}
 	} else {
-		if err := http.Serve(httpListener, makeProxy(false)); err != nil {
+		if err := http.Serve(tcpListener, makeProxy(false)); err != nil {
 			logger.Fatal("error serving HTTP: %v", err)
 		}
 	}
