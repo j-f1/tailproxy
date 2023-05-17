@@ -22,7 +22,7 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - run: go get -u && go mod tidy && go build
+      - run: go get -u tailscale.com && go mod tidy && go build
 
       - name: Check for changes
         id: changes
