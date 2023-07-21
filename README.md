@@ -41,9 +41,9 @@ Make sure to set a valid `TS_AUTHKEY` environment variable (see below) when runn
 You  are required to provide the following options:
 
 - The machine name (env variable: `TAILPROXY_NAME` or first argument to the CLI) to join your tailnet as. Note that Tailscale will automatically add a `-<number>` suffix to the name if it’s already taken.
-- The target to proxy to (env variable: `TAILPROXY_TARGET` or second argument to the CLI). Format it as `host` (to use the default port 80) `host:port` or `host:port/basepath?foo=bar` (in which case `/basepath` will be prepended to all requests to the upstream server and prepend `?foo=bar` to the query string of all requests).
+- The target to proxy to (env variable: `TAILPROXY_TARGET` or second argument to the CLI). Format it as `host` (to use the default port 80) `host:port` or `host:port/basepath?foo=bar` (in which case `/basepath` will be prepended to all requests to the upstream server and `?foo=bar` will be prepended to the query string of all requests).
 
-Additionally, you can set any environment variables that are supported by Tailscale. You’ll most likely want to set the `TS_AUTHKEY` environment variable to a valid [auth key](https://tailscale.com/kb/1085/auth-keys/) so that you don’t have to click the link to approve the new device every time you restart the proxy. Make sure to configure the auth key to provision ephemeral and pre-approved devices when creating it for the smoothest experience.
+Additionally, you can set any environment variables that are supported by Tailscale. You’ll most likely want to set the `TS_AUTHKEY` environment variable to a valid [auth key](https://tailscale.com/kb/1085/auth-keys/) so that you don’t have to click the link to approve the new device every time you restart the proxy. Make sure to configure the auth key to provision pre-approved devices when creating it for the smoothest experience.
 
 You may optionally set `TAILPROXY_DATA_DIR` to a directory where the proxy can store its state. Currently, we’re just storing the Tailscale state (which is placed in the `tailscale` subdirectory of the directory you provide). If you don’t set this, Tailscale will use `/data` if it exists, or a subdirectory named `tsnet-tailproxy` in Go’s `os.UserConfigDir` if `/data` does not exist.
 
@@ -55,7 +55,7 @@ Note that HTTPS/TLS and therefore Funnel are not supported because they require 
 
 ### HTTPS
 
-You can optionally  pass an option to enable HTTPS support (`--https` in the CLI or `TAILPROXY_HTTPS_MODE` as an environment variable). The following values are allowed:
+You can optionally pass an option to enable HTTPS support (`--https` in the CLI or `TAILPROXY_HTTPS_MODE` as an environment variable). The following values are allowed:
 
 - `off` (default): No HTTPS support. The proxy will only listen on port 80.
 - `redirect`: The proxy will listen on both port 80 and port 443. Any HTTP request will be redirected to HTTPS.
@@ -66,7 +66,7 @@ If HTTPS is enabled, tailproxy will use Tailscale’s API to generate a valid ce
 
 ### Funnel
 
-> **Warning**: Tailproxy is relatively safe because it’s only accessible from devices you control. However, Funnel allows anyone from the Internet to talk to your server. That means you have to worry about both the security of Tailproxy and of your server. I don’t know about you, but I don’t really know what I’m doing so besides the inherent safety of Go and the relative simplicity of my code I can’t guarantee that there aren’t any security issues. Use Funnel at your own risk.
+> **Warning**: Tailproxy is relatively safe because it’s only accessible from devices you control. However, Funnel allows anyone from the Internet to talk to your server. That means you have to worry about both the security of Tailproxy and of your server. I don’t know about you, but I don’t really know what I’m doing, so besides the inherent safety of Go and the relative simplicity of my code I can’t guarantee that there aren’t any security issues. Use Funnel at your own risk.
 
 You can optionally make the service behind tailproxy publicly accessible using [Tailscale Funnel](https://tailscale.com/kb/1223/tailscale-funnel/) (`--funnel` in the CLI or `TAILPROXY_FUNNEL_MODE` as an environment variable). The following values are allowed:
 
