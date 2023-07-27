@@ -2,7 +2,7 @@ module tailproxy
 
 go 1.20
 
-require tailscale.com v1.46.0
+require tailscale.com v1.46.1
 
 require (
 	filippo.io/edwards25519 v1.0.0 // indirect
