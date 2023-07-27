@@ -13,3 +13,11 @@ func ServeFunnel() {
 		logger.Fatal("error serving to Funnel: %v", err)
 	}
 }
+
+func ServeFunnelRedirect() {
+	tcpListener := ts.ListenTailnet(80)
+	defer tcpListener.Close()
+	if err := http.Serve(tcpListener, http.HandlerFunc(redirectToHTTPS)); err != nil {
+		logger.Fatal("error serving HTTP-to-tailnet redirect: %v", err)
+	}
+}

@@ -14,12 +14,15 @@ const (
 	FunnelOn
 	// only serve to funnel
 	FunnelOnly
+	// redirect traffic to funnel
+	FunnelRedirect
 )
 
 const (
-	funnelOff  = "off"
-	funnelOn   = "on"
-	funnelOnly = "only"
+	funnelOff      = "off"
+	funnelOn       = "on"
+	funnelOnly     = "only"
+	funnelRedirect = "redirect"
 )
 
 func (m FunnelModeValue) String() string {
@@ -30,6 +33,8 @@ func (m FunnelModeValue) String() string {
 		return funnelOn
 	case FunnelOnly:
 		return funnelOnly
+	case FunnelRedirect:
+		return funnelRedirect
 	default:
 		return fmt.Sprintf("unknown funnel mode %d", m)
 	}
@@ -43,6 +48,8 @@ func parseFunnelMode(s string) FunnelModeValue {
 		return FunnelOn
 	case funnelOnly:
 		return FunnelOnly
+	case funnelRedirect:
+		return FunnelRedirect
 	default:
 		logger.Fatal("invalid funnel mode %q", s)
 		return -1

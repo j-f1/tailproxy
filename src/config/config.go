@@ -40,7 +40,7 @@ func Parse() {
 		loadConfigFromCLI()
 	}
 
-	if FunnelMode == FunnelOnly && HTTPSMode != HTTPSOff {
+	if (FunnelMode == FunnelOnly || FunnelMode == FunnelRedirect) && HTTPSMode != HTTPSOff {
 		logger.Log("note: HTTPS mode is ignored in Funnel-only mode.")
 	}
 
